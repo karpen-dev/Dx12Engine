@@ -8,14 +8,6 @@
 
 namespace DX12 {
 
-    Engine::Engine()
-        : m_running(false) {
-    }
-
-    Engine::~Engine() {
-        shutdown();
-    }
-
     bool Engine::initialize(int width, int height, const std::wstring& title) {
         ConsoleLogger::info("Initializing engine...");
 
@@ -68,20 +60,25 @@ namespace DX12 {
         }
         ConsoleLogger::success("Pipeline created successfully");
 
-        ConsoleLogger::info("Creating triangle mesh...");
-        m_mesh = std::make_unique<Mesh>();
-        if (!m_mesh->createTriangle(*m_graphicsDevice)) {
-            ConsoleLogger::error("Failed to create triangle mesh");
+        ConsoleLogger::info("Creating scene...");
+        m_scene = std::make_unique<Scene>();
+        if (!m_scene->loadTestScene(*m_graphicsDevice))
+        {
+            ConsoleLogger::error("Failed to load scene");
             return false;
         }
-        ConsoleLogger::success("Triangle mesh created successfully");
+        ConsoleLogger::success("Scene loaded!");
 
         ConsoleLogger::info("Creating renderer...");
         m_renderer = std::make_unique<Renderer>();
-        if (!m_renderer->initialize(*m_graphicsDevice, *m_pipeline, *m_mesh)) {
+        if (!m_renderer->initialize(*m_graphicsDevice, *m_pipeline))
+        {
             ConsoleLogger::error("Failed to initialize renderer");
             return false;
         }
+
+        m_renderer->setScene(m_scene.get());
+
         ConsoleLogger::success("Renderer created successfully");
 
         ConsoleLogger::info("Creating camera...");

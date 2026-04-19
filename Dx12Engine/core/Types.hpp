@@ -12,6 +12,14 @@ namespace DX12 {
 	using uint32 = unsigned int;
 	using float32 = float;
 
+	enum class MeshType
+	{
+		Pyramid,
+		Cube,
+		Sphere,
+		Plane
+	};
+
 	struct Vertex {
 		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT4 color;

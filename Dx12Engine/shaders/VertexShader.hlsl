@@ -21,13 +21,11 @@ struct VSOutput {
 VSOutput main(VSInput input) {
     VSOutput output;
 
-    float4 worldPos = mul(float4(input.position, 1.0f), modelView);
-    output.worldPosition = worldPos.xyz;
-
-    output.position = mul(float4(input.position, 1.0f), modelViewProjection);
-
+    float4 pos = float4(input.position, 1.0f);
+    output.position = mul(pos, modelViewProjection);
+    output.worldPosition = mul(pos, modelView).xyz;
     output.worldNormal = mul(input.normal, (float3x3)modelView);
-
+    output.worldNormal = normalize(output.worldNormal);
     output.color = input.color;
 
     return output;

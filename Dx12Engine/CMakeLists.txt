@@ -34,6 +34,16 @@ add_executable(Dx12Engine
 		core/systemInfoLogger/SystemInfoLogger.cpp
 		core/preloader/Preloader.hpp
 		core/preloader/Preloader.cpp
+		core/mesh/bufferManager/BufferManager.hpp
+		core/mesh/bufferManager/BufferManager.cpp
+		core/mesh/modelLoader/ModelLoader.hpp
+		core/mesh/modelLoader/ModelLoader.cpp
+		core/scene/transform/Transform.hpp
+		core/scene/transform/Transform.cpp
+		core/scene/meshRenderer/MeshRenderer.hpp
+		core/scene/meshRenderer/MeshRenderer.cpp
+		core/scene/Scene.hpp
+		core/scene/Scene.cpp
 )
 
 target_include_directories(Dx12Engine PRIVATE

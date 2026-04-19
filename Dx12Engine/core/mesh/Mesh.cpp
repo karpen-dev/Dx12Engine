@@ -1,149 +1,80 @@
 #include "Mesh.hpp"
-
 #include <iostream>
-#include <DirectXMath.h>
 
-#include "../d3dx12.h"
+#include "bufferManager/BufferManager.hpp"
 
 namespace DX12 {
-
-    DirectX::XMFLOAT3 normalize(const DirectX::XMFLOAT3& v) {
-        const float len = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-        if (len == 0.0f) return DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
-        return DirectX::XMFLOAT3(v.x / len, v.y / len, v.z / len);
-    }
-
-    Mesh::Mesh() = default;
-    Mesh::~Mesh() = default;
-
-    bool Mesh::createTriangle(const GraphicsDevice& device) {
-        std::cout << "[DEBUG] Creating pyramid..." << std::endl;
-
-        Vertex vertices[] = {
-            { DirectX::XMFLOAT3(0.0f, -0.5f, 0.7f),
-              DirectX::XMFLOAT4(1.0f, 0.3f, 0.3f, 1.0f),
-              DirectX::XMFLOAT3(0.0f, -0.5f, 0.8f) },
-
-            { DirectX::XMFLOAT3(-0.6f, -0.5f, -0.4f),
-              DirectX::XMFLOAT4(0.3f, 1.0f, 0.3f, 1.0f),
-              DirectX::XMFLOAT3(-0.7f, -0.5f, 0.2f) },
-
-            { DirectX::XMFLOAT3(0.6f, -0.5f, -0.4f),
-              DirectX::XMFLOAT4(0.3f, 0.3f, 1.0f, 1.0f),
-              DirectX::XMFLOAT3(0.7f, -0.5f, 0.2f) },
-
-            { DirectX::XMFLOAT3(0.0f, 0.7f, 0.0f),
-              DirectX::XMFLOAT4(1.0f, 0.8f, 0.2f, 1.0f),
-              DirectX::XMFLOAT3(0.0f, 0.8f, 0.0f) }
-        };
-
-        constexpr auto baseNormal = DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f);
-
-        vertices[0].normal = baseNormal;
-        vertices[1].normal = baseNormal;
-        vertices[2].normal = baseNormal;
-
-        vertices[3].normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-        m_vertexCount = 4;
-
-        const uint32 indices[] = {
-            0, 2, 1,
-            0, 1, 3,
-            1, 2, 3,
-            2, 0, 3
-        };
-
-        m_indexCount = 12;
-
-        for (int i = 0; i < m_vertexCount; i++) {
-            std::cout << "  Vertex " << i << ": pos("
-                      << vertices[i].position.x << ", "
-                      << vertices[i].position.y << ", "
-                      << vertices[i].position.z << ") color("
-                      << vertices[i].color.x << ", "
-                      << vertices[i].color.y << ", "
-                      << vertices[i].color.z << ")" << std::endl;
-        }
-
-        constexpr UINT vertexBufferSize = sizeof(vertices);
-
-        const CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
-        CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize);
-
-        HRESULT hr = device.getDevice()->CreateCommittedResource(
-            &heapProps,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_vertexBuffer)
-        );
-
-        if (FAILED(hr)) {
-            std::cerr << "[ERROR] Failed to create vertex buffer" << std::endl;
+    bool Mesh::createFromData(const GraphicsDevice& device, const MeshData& meshData) {
+        if (meshData.isEmpty()) {
+            std::cerr << "[ERROR] MeshData is empty!" << std::endl;
             return false;
         }
 
-        void* mappedData;
-        CD3DX12_RANGE readRange(0, 0);
-        hr = m_vertexBuffer->Map(0, &readRange, &mappedData);
-        if (FAILED(hr)) {
-            std::cerr << "[ERROR] Failed to map vertex buffer" << std::endl;
-            return false;
+        m_name = meshData.name;
+        m_vertexCount = static_cast<int>(meshData.vertices.size());
+        m_indexCount = static_cast<int>(meshData.indices.size());
+
+        std::cout << "[DEBUG] Creating mesh '" << m_name << "'" << std::endl;
+        std::cout << "  Vertices: " << m_vertexCount << std::endl;
+        std::cout << "  Indices: " << m_indexCount << std::endl;
+
+        if (m_useManager && m_bufferManager) {
+            if (!m_bufferManager->createBuffer(device, meshData.vertices.data(),
+                sizeof(Vertex) * meshData.vertices.size(), BufferType::Vertex, &m_vertexBufferId)) {
+                std::cerr << "[ERROR] Failed to create vertex buffer via manager" << std::endl;
+                return false;
+            }
+
+            if (!m_bufferManager->createBuffer(device, meshData.indices.data(),
+                sizeof(uint32_t) * meshData.indices.size(), BufferType::Index, &m_indexBufferId)) {
+                std::cerr << "[ERROR] Failed to create index buffer via manager" << std::endl;
+                return false;
+            }
+        } else {
+            m_vertexBuffer = std::make_unique<Buffer>();
+            if (!m_vertexBuffer->create(device, meshData.vertices.data(),
+                sizeof(Vertex) * meshData.vertices.size(), BufferType::Vertex)) {
+                std::cerr << "[ERROR] Failed to create vertex buffer" << std::endl;
+                return false;
+            }
+
+            m_indexBuffer = std::make_unique<Buffer>();
+            if (!m_indexBuffer->create(device, meshData.indices.data(),
+                sizeof(uint32_t) * meshData.indices.size(), BufferType::Index)) {
+                std::cerr << "[ERROR] Failed to create index buffer" << std::endl;
+                return false;
+            }
         }
 
-        memcpy(mappedData, vertices, vertexBufferSize);
-        m_vertexBuffer->Unmap(0, nullptr);
-
-        m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-        m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-        m_vertexBufferView.SizeInBytes = vertexBufferSize;
-
-        constexpr UINT indexBufferSize = sizeof(indices);
-        resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(indexBufferSize);
-
-        hr = device.getDevice()->CreateCommittedResource(
-            &heapProps,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            nullptr,
-            IID_PPV_ARGS(&m_indexBuffer)
-        );
-
-        if (FAILED(hr)) {
-            std::cerr << "[ERROR] Failed to create index buffer" << std::endl;
-            return false;
-        }
-
-        hr = m_indexBuffer->Map(0, &readRange, &mappedData);
-        if (FAILED(hr)) {
-            std::cerr << "[ERROR] Failed to map index buffer" << std::endl;
-            return false;
-        }
-
-        memcpy(mappedData, indices, indexBufferSize);
-        m_indexBuffer->Unmap(0, nullptr);
-
-        m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-        m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-        m_indexBufferView.SizeInBytes = indexBufferSize;
-
-        std::cout << "[SUCCESS] Pyramid created. Vertices: " << m_vertexCount
-                  << ", Indices: " << m_indexCount << std::endl;
-
+        std::cout << "[SUCCESS] Mesh '" << m_name << "' created successfully!" << std::endl;
         return true;
     }
 
-    void Mesh::draw(const GraphicsDevice& device) const
-    {
-        const auto commandList = device.getCommandList();
+    bool Mesh::createPyramid(const GraphicsDevice& device) {
+        return createFromData(device, ModelLoader::createPyramid());
+    }
 
-        commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+    bool Mesh::createCube(const GraphicsDevice& device, float size) {
+        return createFromData(device, ModelLoader::createCube(size));
+    }
 
-        if (m_indexBuffer) {
-            commandList->IASetIndexBuffer(&m_indexBufferView);
+    bool Mesh::createSphere(const GraphicsDevice& device, float radius, int segments) {
+        return createFromData(device, ModelLoader::createSphere(radius, segments));
+    }
+
+    bool Mesh::createPlane(const GraphicsDevice& device, float width, float depth) {
+        return createFromData(device, ModelLoader::createPlane(width, depth));
+    }
+
+    void Mesh::draw(const GraphicsDevice& device) const {
+        auto commandList = device.getCommandList();
+
+        if (m_useManager && m_bufferManager) {
+            m_bufferManager->bindVertexBuffer(device, m_vertexBufferId);
+            m_bufferManager->bindIndexBuffer(device, m_indexBufferId);
+        } else {
+            if (m_vertexBuffer) m_vertexBuffer->bindVertex(device);
+            if (m_indexBuffer) m_indexBuffer->bindIndex(device);
         }
 
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

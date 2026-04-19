@@ -10,51 +10,44 @@ namespace DX12 {
     void Camera::update(const float deltaTime) {
         m_rotationAngle += deltaTime * 1.0f;
 
-        DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 1.0f, -3.0f, 0.0f);
+        DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 2.0f, -5.0f, 0.0f);
         DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
         DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         DirectX::XMStoreFloat4x4(&m_viewMatrix, DirectX::XMMatrixLookAtLH(eye, at, up));
 
         DirectX::XMStoreFloat4x4(&m_projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(
-            DirectX::XMConvertToRadians(45.0f), m_aspectRatio, 0.1f, 100.0f));
+            DirectX::XMConvertToRadians(60.0f), m_aspectRatio, 0.1f, 100.0f));
     }
 
-    DirectX::XMFLOAT4X4 Camera::getViewProjectionMatrix() const {
-        DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
-        DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-        DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(eye, at, up);
+    DirectX::XMFLOAT4X4 Camera::getMVPForObject(const DirectX::XMFLOAT4X4& worldMatrix) const {
+        DirectX::XMMATRIX world = DirectX::XMLoadFloat4x4(&worldMatrix);
+        DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_viewMatrix);
+        DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_projectionMatrix);
 
-        DirectX::XMMATRIX proj = DirectX::XMMatrixPerspectiveFovLH(
-            DirectX::XMConvertToRadians(45.0f), m_aspectRatio, 0.1f, 100.0f);
-
-        DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationY(m_rotationAngle);
-
-        DirectX::XMMATRIX mvp = rotation * view * proj;
-
-        mvp = DirectX::XMMatrixTranspose(mvp);
+        DirectX::XMMATRIX mvp = world * view * proj;
 
         DirectX::XMFLOAT4X4 result;
         DirectX::XMStoreFloat4x4(&result, mvp);
+        return result;
+    }
 
+    DirectX::XMFLOAT4X4 Camera::getViewProjectionMatrix() const {
+        DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_viewMatrix);
+        DirectX::XMMATRIX proj = DirectX::XMLoadFloat4x4(&m_projectionMatrix);
+
+        DirectX::XMMATRIX viewProj = view * proj;
+
+        DirectX::XMFLOAT4X4 result;
+        DirectX::XMStoreFloat4x4(&result, viewProj);
         return result;
     }
 
     DirectX::XMFLOAT4X4 Camera::getModelViewMatrix() const {
-        DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
-        DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-        DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(eye, at, up);
-
-        DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationY(m_rotationAngle);
-
-        DirectX::XMMATRIX modelView = rotation * view;
-
-        modelView = DirectX::XMMatrixTranspose(modelView);
+        DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&m_viewMatrix);
+        DirectX::XMMATRIX modelView = view;
 
         DirectX::XMFLOAT4X4 result;
         DirectX::XMStoreFloat4x4(&result, modelView);
-
         return result;
     }
 
@@ -62,4 +55,6 @@ namespace DX12 {
         m_aspectRatio = aspect;
     }
 
+    const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const { return m_viewMatrix; }
+    const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const { return m_projectionMatrix; }
 }

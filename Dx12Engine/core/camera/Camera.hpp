@@ -9,9 +9,12 @@ namespace DX12 {
         Camera();
 
         void update(float deltaTime);
+        DirectX::XMFLOAT4X4 getMVPForObject(const DirectX::XMFLOAT4X4& worldMatrix) const;
         DirectX::XMFLOAT4X4 getModelViewMatrix() const;
         DirectX::XMFLOAT4X4 getViewProjectionMatrix() const;
         void setAspectRatio(float aspect);
+        const DirectX::XMFLOAT4X4& getViewMatrix() const;
+        const DirectX::XMFLOAT4X4& getProjectionMatrix() const;
 
     private:
         DirectX::XMFLOAT4X4 m_viewMatrix;

@@ -142,8 +142,7 @@ namespace DX12 {
 
         const auto& objects = m_currentScene->getAllObjects();
         for (const auto& renderer : objects) {
-            DirectX::XMFLOAT4X4 worldMatrix4x4 = renderer->getTransform().getMatrix();
-            DirectX::XMMATRIX worldMatrix = DirectX::XMLoadFloat4x4(&worldMatrix4x4);
+            DirectX::XMMATRIX worldMatrix = renderer->getTransform().getMatrix();
 
             DirectX::XMMATRIX mvpMat = worldMatrix * viewMat * projMat;
             DirectX::XMMATRIX modelViewMat = worldMatrix * viewMat;

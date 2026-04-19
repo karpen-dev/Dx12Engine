@@ -44,6 +44,8 @@ add_executable(Dx12Engine
 		core/scene/meshRenderer/MeshRenderer.cpp
 		core/scene/Scene.hpp
 		core/scene/Scene.cpp
+		api/player/Player.hpp
+		api/player/Player.cpp
 )
 
 target_include_directories(Dx12Engine PRIVATE

@@ -57,4 +57,8 @@ namespace DX12 {
 
     const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const { return m_viewMatrix; }
     const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const { return m_projectionMatrix; }
+
+    void Camera::setViewMatrix(const DirectX::XMFLOAT4X4& viewMatrix) {
+        m_viewMatrix = viewMatrix;
+    }
 }

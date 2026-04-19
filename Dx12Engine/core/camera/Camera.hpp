@@ -16,6 +16,8 @@ namespace DX12 {
         const DirectX::XMFLOAT4X4& getViewMatrix() const;
         const DirectX::XMFLOAT4X4& getProjectionMatrix() const;
 
+        void setViewMatrix(const DirectX::XMFLOAT4X4& viewMatrix);
+
     private:
         DirectX::XMFLOAT4X4 m_viewMatrix;
         DirectX::XMFLOAT4X4 m_projectionMatrix;

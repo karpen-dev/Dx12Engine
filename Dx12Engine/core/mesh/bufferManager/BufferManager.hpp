@@ -8,6 +8,9 @@
 
 namespace DX12
 {
+    class GraphicsDevice;
+    struct Vertex;
+
     enum class BufferType
     {
         Vertex,

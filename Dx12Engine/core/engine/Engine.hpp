@@ -18,13 +18,20 @@ namespace DX12 {
         Engine() = default;
         ~Engine() { shutdown(); }
 
-        bool initialize(int width, int height, const std::wstring& title);
+        bool initialize(int width, int height, LPCWSTR title);
         void run();
         void shutdown();
+
+        void setPlayer(Player player)
+        {
+            m_player = std::make_unique<Player>(player);
+        }
 
     private:
         void update(float deltaTime);
         void render();
+
+        std::unique_ptr<Player> m_player;
 
         std::unique_ptr<Window> m_window;
         std::unique_ptr<GraphicsDevice> m_graphicsDevice;

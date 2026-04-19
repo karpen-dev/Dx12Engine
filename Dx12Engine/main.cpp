@@ -1,11 +1,14 @@
 #include "./core/engine/Engine.hpp"
 #include "./core/ConsoleLogger.hpp"
 #include "./core/preloader/Preloader.hpp"
+#include "./api/player/Player.hpp"
 
 #include <comdef.h>
 #include <iostream>
 #include <string>
 #include <Windows.h>
+
+DX12::Player* g_player = nullptr;
 
 LONG WINAPI unhandledExceptionHandler(EXCEPTION_POINTERS* exceptionInfo) {
     ConsoleLogger::error("Unhandled exception occurred!");
@@ -48,7 +51,7 @@ int main() {
 
     std::cout << "\n";
     ConsoleLogger::success("╔══════════════════════════════════════════════════════════════╗");
-    ConsoleLogger::success("║         DirectX 12 Engine - Triangle Demo v1.0              ║");
+    ConsoleLogger::success("║                     DirectX 12 Engine                        ║");
     ConsoleLogger::success("╚══════════════════════════════════════════════════════════════╝");
     std::cout << "\n";
 
@@ -70,7 +73,7 @@ int main() {
 
     DX12::Engine engine;
 
-    if (!engine.initialize(1024, 768, L"DirectX 12 Triangle Engine")) {
+    if (!engine.initialize(1280, 720, L"DirectX 12 Engine")) {
         ConsoleLogger::error("Failed to initialize engine!");
 
         ConsoleLogger::info("\nTroubleshooting tips:");
@@ -84,23 +87,47 @@ int main() {
         return 1;
     }
 
+    DX12::Player player;
+    g_player = &player;
+
+    player.setMoveSpeed(8.0f);
+    player.setMouseSensitivity(0.003f);
+    player.setPosition(DirectX::XMFLOAT3(0.0f, 2.0f, -5.0f));
+
+    engine.setPlayer(player);
+
+    ConsoleLogger::success("Player created and attached to engine!");
+    ConsoleLogger::info("  - Move Speed: 8.0 units/sec");
+    ConsoleLogger::info("  - Mouse Sensitivity: 0.003");
+    ConsoleLogger::info("  - Start Position: (0, 2, -5)");
+
     ConsoleLogger::success("Engine initialized successfully!");
+
+    ConsoleLogger::info("\n=== Controls ===");
+    ConsoleLogger::info("  Movement:     WASD or Arrow Keys");
+    ConsoleLogger::info("  Look Around:  Mouse (click to capture)");
+    ConsoleLogger::info("  Jump:         Space or E");
+    ConsoleLogger::info("  Crouch:       Ctrl or Q");
+    ConsoleLogger::info("  Capture Mouse: Left Click or F1");
+    ConsoleLogger::info("  Release Mouse: Right Click or ESC");
+    ConsoleLogger::info("  Exit:         ESC (when mouse not captured)");
     ConsoleLogger::info("\n=== Starting Main Loop ===");
-    ConsoleLogger::info("  - Triangle is rotating around Y axis");
-    ConsoleLogger::info("  - Press ESC to exit");
-    ConsoleLogger::info("  - Close window to exit");
-    std::cout << "\n";
 
     engine.run();
 
     std::cout << "\n";
     ConsoleLogger::info("=== Engine Shutdown ===");
+
+    player.setMouseCapture(false);
     engine.shutdown();
+
     ConsoleLogger::success("Engine shut down successfully!");
 
     std::cout << "\n";
     ConsoleLogger::info("Press Enter to exit...");
     std::cin.get();
+
+    g_player = nullptr;
 
     return 0;
 }

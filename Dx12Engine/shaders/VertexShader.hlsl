@@ -1,6 +1,6 @@
 cbuffer TransformBuffer : register(b0) {
-    float4x4 modelViewProjection;
-    float4x4 modelView;
+    row_major float4x4 modelViewProjection;
+    row_major float4x4 modelView;
     float3 lightDirection;
     float time;
 };

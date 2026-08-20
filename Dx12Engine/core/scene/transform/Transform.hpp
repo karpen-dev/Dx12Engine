@@ -19,13 +19,17 @@ namespace DX12
         const DirectX::XMFLOAT3& getPosition() const { return m_position; }
         const DirectX::XMFLOAT3& getRotation() const { return m_rotation; }
         const DirectX::XMFLOAT3& getScale() const { return m_scale; }
+        const DirectX::XMFLOAT4X4& getWorldMatrix();
 
         DirectX::XMFLOAT4X4 getMatrix() const;
 
     private:
+        void updateMatrix();
+
         DirectX::XMFLOAT3 m_position;
         DirectX::XMFLOAT3 m_rotation;
         DirectX::XMFLOAT3 m_scale;
+        DirectX::XMFLOAT4X4 m_worldMatrix;
 
         mutable bool m_matrixDirty;
         mutable DirectX::XMFLOAT4X4 m_cachedMatrix;

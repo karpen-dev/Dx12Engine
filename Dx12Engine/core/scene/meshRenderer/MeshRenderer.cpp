@@ -28,11 +28,14 @@ namespace DX12 {
         }
     }
 
-    void MeshRenderer::draw(const GraphicsDevice& device, const DirectX::XMMATRIX& viewProjection) const
+    void MeshRenderer::draw(const GraphicsDevice& device, const DirectX::XMMATRIX& viewProjection)
     {
         if (!m_mesh) return;
 
         m_mesh->draw(device);
     }
 
+    void MeshRenderer::update(float deltaTime) {
+        //m_transform.rotate(deltaTime * 0.5f, deltaTime * 0.5f, deltaTime * 0.5f);
+    }
 }

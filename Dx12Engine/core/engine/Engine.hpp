@@ -18,9 +18,13 @@ namespace DX12 {
         Engine() = default;
         ~Engine() { shutdown(); }
 
-        bool initialize(int width, int height, const std::wstring& title);
+        bool initialize(int width, int height, const std::wstring& title, Scene& scene);
         void run();
         void shutdown();
+
+        GraphicsDevice& getGraphicsDevice() {
+            return *m_graphicsDevice;
+        }
 
     private:
         void update(float deltaTime);

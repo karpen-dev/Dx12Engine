@@ -40,9 +40,9 @@ namespace DX12
 
     void Transform::rotate(float pith, float yaw, float roll)
     {
-        m_rotation.x = pith;
-        m_rotation.y = yaw;
-        m_rotation.z = roll;
+        m_rotation.x += pith;
+        m_rotation.y += yaw;
+        m_rotation.z += roll;
 
         m_matrixDirty = true;
     }
@@ -60,5 +60,30 @@ namespace DX12
         }
 
         return m_cachedMatrix;
+    }
+
+    const DirectX::XMFLOAT4X4& Transform::getWorldMatrix() {
+        if (m_matrixDirty) {
+            updateMatrix();
+        }
+        return m_worldMatrix;
+    }
+
+    void Transform::updateMatrix() {
+        DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationRollPitchYaw(
+            m_rotation.x,
+            m_rotation.y,
+            m_rotation.z
+        );
+
+        DirectX::XMMATRIX translate = DirectX::XMMatrixTranslation(
+            m_position.x,
+            m_position.y,
+            m_position.z
+        );
+
+        DirectX::XMMATRIX world = rotation * translate;
+        DirectX::XMStoreFloat4x4(&m_worldMatrix, world);
+        m_matrixDirty = false;
     }
 }

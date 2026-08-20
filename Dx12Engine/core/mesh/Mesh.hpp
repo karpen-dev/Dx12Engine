@@ -33,18 +33,18 @@ namespace DX12 {
         void setBufferManager(BufferManager* manager) { m_bufferManager = manager; }
 
     private:
-        BufferManager* m_bufferManager;
+        BufferManager* m_bufferManager = nullptr;
 
         std::unique_ptr<Buffer> m_vertexBuffer;
         std::unique_ptr<Buffer> m_indexBuffer;
 
-        UINT m_vertexBufferId;
-        UINT m_indexBufferId;
+        UINT m_vertexBufferId = 0;
+        UINT m_indexBufferId = 0;
 
         std::string m_name;
-        int m_vertexCount;
-        int m_indexCount;
+        int m_vertexCount = 0;
+        int m_indexCount = 0;
 
-        bool m_useManager;
+        bool m_useManager = false;
     };
 }

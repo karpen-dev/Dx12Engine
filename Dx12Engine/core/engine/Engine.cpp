@@ -8,7 +8,7 @@
 
 namespace DX12 {
 
-    bool Engine::initialize(int width, int height, const std::wstring& title) {
+    bool Engine::initialize(int width, int height, const std::wstring& title, Scene& scene) {
         ConsoleLogger::info("Initializing engine...");
 
         ConsoleLogger::info("Creating window...");
@@ -60,14 +60,7 @@ namespace DX12 {
         }
         ConsoleLogger::success("Pipeline created successfully");
 
-        ConsoleLogger::info("Creating scene...");
-        m_scene = std::make_unique<Scene>();
-        if (!m_scene->loadTestScene(*m_graphicsDevice))
-        {
-            ConsoleLogger::error("Failed to load scene");
-            return false;
-        }
-        ConsoleLogger::success("Scene loaded!");
+        m_scene = std::make_unique<Scene>(std::move(scene));
 
         ConsoleLogger::info("Creating renderer...");
         m_renderer = std::make_unique<Renderer>();
@@ -117,6 +110,11 @@ namespace DX12 {
 
     void Engine::update(float deltaTime) {
         m_camera->update(deltaTime);
+
+        auto& objects = m_scene.get()->getAllObjects();
+        for (auto& obj : objects) {
+            obj.get()->update(deltaTime);
+        }
     }
 
     void Engine::render() {

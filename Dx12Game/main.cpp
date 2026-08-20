@@ -1,6 +1,8 @@
-#include "./core/engine/Engine.hpp"
-#include "./core/ConsoleLogger.hpp"
-#include "./core/preloader/Preloader.hpp"
+#include <core/engine/Engine.hpp>
+#include <core/ConsoleLogger.hpp>
+#include <core/preloader/Preloader.hpp>
+
+#include "game/GameScene.hpp"
 
 #include <comdef.h>
 #include <iostream>
@@ -14,7 +16,7 @@ LONG WINAPI unhandledExceptionHandler(EXCEPTION_POINTERS* exceptionInfo) {
         case EXCEPTION_ACCESS_VIOLATION:
             ConsoleLogger::error("  Access violation (memory read/write error)");
             ConsoleLogger::error("  Address: 0x" +
-                std::to_string(reinterpret_cast<uintptr_t>(exceptionInfo->ExceptionRecord->ExceptionAddress)));
+            std::to_string(reinterpret_cast<uintptr_t>(exceptionInfo->ExceptionRecord->ExceptionAddress)));
             break;
         case EXCEPTION_ILLEGAL_INSTRUCTION:
             ConsoleLogger::error("  Illegal instruction");
@@ -24,7 +26,7 @@ LONG WINAPI unhandledExceptionHandler(EXCEPTION_POINTERS* exceptionInfo) {
             break;
         default:
             ConsoleLogger::error("  Exception code: 0x" +
-                std::to_string(exceptionInfo->ExceptionRecord->ExceptionCode));
+            std::to_string(exceptionInfo->ExceptionRecord->ExceptionCode));
             break;
     }
 
@@ -70,7 +72,10 @@ int main() {
 
     DX12::Engine engine;
 
-    if (!engine.initialize(1024, 768, L"DirectX 12 Triangle Engine")) {
+    auto& device = engine.getGraphicsDevice();
+    DX12::Scene scene = Dx12Game::GameScene(device);
+
+    if (!engine.initialize(1024, 768, L"DirectX 12 Triangle Engine", scene)) {
         ConsoleLogger::error("Failed to initialize engine!");
 
         ConsoleLogger::info("\nTroubleshooting tips:");

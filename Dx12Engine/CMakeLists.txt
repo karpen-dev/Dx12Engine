@@ -1,5 +1,14 @@
-﻿set(CMAKE_CXX_STANDARD 20)
+﻿cmake_minimum_required(VERSION 3.16)
+project(Dx12EngineCore VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(WIN32)
+	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+	add_compile_definitions(DX12_ENGINE_EXPORTS)
+endif()
 
 find_path(D3D12_INCLUDE_DIR d3d12.h)
 find_path(DXGI_INCLUDE_DIR dxgi.h)
@@ -10,7 +19,7 @@ find_library(DXGI_LIBRARY dxgi.lib)
 find_library(D3DCOMPILER_LIBRARY d3dcompiler.lib)
 find_library(DXGUID_LIBRARY dxguid.lib)
 
-add_executable(Dx12Engine
+add_library(Dx12EngineCore SHARED
 		core/Types.hpp
 		core/window/Window.cpp
 		core/window/Window.hpp
@@ -28,7 +37,6 @@ add_executable(Dx12Engine
 		core/renderer/Renderer.cpp
 		core/engine/Engine.hpp
 		core/engine/Engine.cpp
-		main.cpp
 		core/ConsoleLogger.hpp
 		core/systemInfoLogger/SystemInfoLogger.h
 		core/systemInfoLogger/SystemInfoLogger.cpp
@@ -46,22 +54,51 @@ add_executable(Dx12Engine
 		core/scene/Scene.cpp
 )
 
-target_include_directories(Dx12Engine PRIVATE
+target_include_directories(Dx12EngineCore PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${D3D12_INCLUDE_DIR}
 		${DXGI_INCLUDE_DIR}
 		${D3DCOMPILER_INCLUDE_DIR}
 )
 
-target_link_libraries(Dx12Engine
+target_link_libraries(Dx12EngineCore
 		${D3D12_LIBRARY}
 		${DXGI_LIBRARY}
 		${D3DCOMPILER_LIBRARY}
 		${DXGUID_LIBRARY}
 )
 
-set_target_properties(Dx12Engine PROPERTIES LINKER_LANGUAGE CXX)
+if(WIN32)
+	target_compile_definitions(Dx12EngineCore PRIVATE DX12_ENGINE_EXPORTS)
+	if(MSVC)
+		set_target_properties(Dx12EngineCore PROPERTIES
+				WINDOWS_EXPORT_ALL_SYMBOLS TRUE
+		)
+	endif()
+endif()
 
 if(MSVC)
-	target_compile_options(Dx12Engine PRIVATE /EHsc /W4)
+	target_compile_options(Dx12EngineCore PRIVATE /EHsc /W4 /WX-)
+	target_compile_definitions(Dx12EngineCore PRIVATE _CRT_SECURE_NO_WARNINGS)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+	target_compile_options(Dx12EngineCore PRIVATE -Wall -Wextra -Wpedantic)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_compile_options(Dx12EngineCore PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+install(TARGETS Dx12EngineCore
+		EXPORT Dx12EngineTargets
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib/static
+		INCLUDES DESTINATION include
+)
+
+install(DIRECTORY core/
+		DESTINATION include/Dx12Engine/core
+		FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+)
+
+export(EXPORT Dx12EngineTargets
+		FILE "${CMAKE_CURRENT_BINARY_DIR}/Dx12EngineTargets.cmake"
+)

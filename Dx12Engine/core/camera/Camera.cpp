@@ -16,17 +16,17 @@ namespace DX12 {
     }
 
     void Camera::update(const float deltaTime) {
-        m_rotationAngle += deltaTime * 1.0f;
+        //m_rotationAngle += deltaTime * 1.0f;
 
         // じかんじくじょでのいちじてきなてすとろてしょぬ
-        m_rotationAngle += deltaTime * 1.0f;
+        //m_rotationAngle += deltaTime * 1.0f;
 
         updateViewMatrix();
 
-        DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 2.0f, -5.0f, 0.0f);
-        DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-        DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-        DirectX::XMStoreFloat4x4(&m_viewMatrix, DirectX::XMMatrixLookAtLH(eye, at, up));
+        // DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 2.0f, -5.0f, 0.0f);
+        // DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+        // DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        // DirectX::XMStoreFloat4x4(&m_viewMatrix, DirectX::XMMatrixLookAtLH(eye, at, up));
 
         DirectX::XMStoreFloat4x4(&m_projectionMatrix, DirectX::XMMatrixPerspectiveFovLH(
             DirectX::XMConvertToRadians(60.0f), m_aspectRatio, 0.1f, 100.0f));

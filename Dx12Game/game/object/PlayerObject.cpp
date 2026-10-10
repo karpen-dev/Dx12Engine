@@ -17,17 +17,15 @@ namespace Dx12Game {
         auto& t = getTransform();
 
         auto p = t.getPosition();
-        if (window.isKeyDown('W')) p.z += speed * deltaTime;
-        if (window.isKeyDown('S')) p.z -= speed * deltaTime;
-        if (window.isKeyDown('A')) p.x -= speed * deltaTime;
-        if (window.isKeyDown('D')) p.x += speed * deltaTime;
+        if (window.isKeyDown('W')) p.z -= speed * deltaTime;
+        if (window.isKeyDown('S')) p.z += speed * deltaTime;
+        if (window.isKeyDown('A')) p.x += speed * deltaTime;
+        if (window.isKeyDown('D')) p.x -= speed * deltaTime;
         t.setPosition(p.x, p.y, p.z);
 
-        auto camera = m_engine.getCamera();
-        camera.setPosition(p.x, p.y + 5.0f, p.z - 10.0f);
+        auto& camera = m_engine.getCamera();
+        camera.setPosition(p.x, p.y, p.z + 1.0f);
         camera.setTarget(p.x, p.y, p.z);
-
-        ConsoleLogger::info("updated");
     }
 
 }

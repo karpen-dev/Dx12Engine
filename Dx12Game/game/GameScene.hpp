@@ -6,7 +6,7 @@
 #include <core/scene/Scene.hpp>
 #include <core/ConsoleLogger.hpp>
 
-#include "gameObject/GameObject.hpp"
+#include "object/PlayerObject.hpp"
 
 namespace Dx12Game {
     class GameScene : public DX12::Scene {
@@ -25,13 +25,17 @@ namespace Dx12Game {
             ConsoleLogger::info("Getting device...");
             auto& device = m_engine.getGraphicsDevice();
 
-            auto camera = std::make_unique<DX12::Camera>();
+            auto* player = addObject<PlayerObject>("Player", m_engine);
+            auto* playerMesh = addMeshRenderer("PlayerVisual");
+            if (playerMesh && playerMesh->createMesh(device, DX12::MeshType::Cube)) {
+                playerMesh->getTransform().setParent(&player->getTransform());
+                playerMesh->getTransform().setPosition(0.0f, 0.0f, 0.0f);
+            }
 
-            const auto width = static_cast<float>(m_engine.getWindow().getWidth());
-            const auto height = static_cast<float>(m_engine.getWindow().getHeight());
-
-            camera->setAspectRatio(width / height);
-            m_engine.setCamera(std::make_unique<DX12::Camera>());
+            if (!player) {
+                ConsoleLogger::error("Failed to create PlayerObject");
+                return;
+            }
 
             auto* pyramid = addMeshRenderer("Pyramid");
             if (!pyramid || !pyramid->createMesh(device, DX12::MeshType::Pyramid)) {

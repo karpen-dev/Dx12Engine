@@ -107,6 +107,7 @@ namespace DX12 {
     void Engine::update(float deltaTime) {
         m_camera->update(deltaTime);
         m_scene->update(deltaTime);
+        m_window->endFrame();
 
         auto& objects = m_scene.get()->getAllObjects();
         for (auto& obj : objects) {

@@ -13,6 +13,9 @@ namespace DX12
         void setRotation(float pith, float yaw, float roll);
         void setScale(float x, float y, float z);
 
+        void setParent(Transform* parent) { m_parent = parent; }
+        Transform* getParent() const { return m_parent; }
+
         void translate(float x, float y, float z);
         void rotate(float pith, float yaw, float roll);
 
@@ -33,5 +36,7 @@ namespace DX12
 
         mutable bool m_matrixDirty;
         mutable DirectX::XMFLOAT4X4 m_cachedMatrix;
+
+        Transform* m_parent = nullptr;
     };
 }

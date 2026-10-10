@@ -13,7 +13,8 @@ endif()
 add_executable(Game
 		main.cpp
 		game/GameScene.hpp
-		game/gameObject/GameObject.hpp
+		game/object/PlayerObject.hpp
+		game/object/PlayerObject.cpp
 )
 
 target_include_directories(Game PRIVATE

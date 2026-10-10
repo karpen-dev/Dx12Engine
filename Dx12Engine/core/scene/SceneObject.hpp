@@ -27,6 +27,8 @@ namespace DX12 {
         Transform& getTransform() { return m_transform; }
         const Transform& getTransform() const { return m_transform; }
 
+        void setTransform(Transform transform) { m_transform = std::move(transform); }
+
         bool isActive() const { return m_active; }
         void setActive(bool active) { m_active = active; }
 

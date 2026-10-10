@@ -45,6 +45,9 @@ namespace DX12 {
 
         void setCamera(std::unique_ptr<Camera> camera) noexcept { m_camera = std::move(camera); }
 
+        Camera& getCamera() noexcept { return *m_camera; }
+        const Camera& getCamera() const noexcept { return *m_camera; }
+
     private:
         void update(float deltaTime);
         void render();

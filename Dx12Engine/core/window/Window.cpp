@@ -11,28 +11,30 @@ namespace DX12 {
 
 	bool Window::init()
 	{
-		WNDCLASSEX wc = {};
-		wc.cbSize = sizeof(WNDCLASSEX);
+		WNDCLASSEXW wc = {};
+		wc.cbSize = sizeof(WNDCLASSEXW);
 		wc.style = CS_HREDRAW | CS_VREDRAW;
 		wc.lpfnWndProc = windowProc;
 		wc.hInstance = GetModuleHandle(nullptr);
-		wc.lpszClassName = reinterpret_cast<LPCSTR>("DX12WindowClass");
+		wc.lpszClassName = L"DX12WindowClass";
 
-		RegisterClassEx(&wc);
+		if (!RegisterClassExW(&wc))
+			return false;
 
 		RECT rect = {0, 0, m_width, m_height};
-		AdjustWindowRect(&rect, WS_OVERLAPPED, FALSE);
+		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-		m_hwnd = CreateWindowEx(
+		m_hwnd = CreateWindowExW(
 			0,
-			"DX12WindowClass",
-			reinterpret_cast<LPCSTR>(m_title.c_str()),
+			L"DX12WindowClass",
+			m_title.c_str(),
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			rect.right - rect.left,
 			rect.bottom - rect.top,
 			nullptr, nullptr,
-			wc.hInstance, this
+			wc.hInstance,
+			this
 		);
 
 		if (!m_hwnd)
@@ -55,13 +57,14 @@ namespace DX12 {
 	bool Window::proccessMessages()
 	{
 		MSG msg = {};
-		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+
+		while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
 				return false;
 
 			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			DispatchMessageW(&msg);
 		}
 
 		return true;
@@ -69,17 +72,37 @@ namespace DX12 {
 
 	LRESULT Window::windowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		switch (msg)
+		if (msg == WM_NCCREATE)
 		{
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			return 0;
-		case WM_KEYDOWN:
-			if (wParam == VK_ESCAPE) PostQuitMessage(0);
-			return 0;
+			LPCREATESTRUCTW cs = reinterpret_cast<LPCREATESTRUCTW>(lParam);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(cs->lpCreateParams));
 		}
 
-		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
+		Window* w = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
+		switch (msg)
+		{
+			case WM_DESTROY:
+				PostQuitMessage(0);
+				return 0;
+
+			case WM_KEYDOWN:
+			{
+				if (wParam == VK_ESCAPE) {
+					PostQuitMessage(0);
+					return 0;
+				}
+				if (w) w->onKeyDown(wParam);
+				return 0;
+			}
+
+			case WM_KEYUP:
+			{
+				if (w) w->onKeyUp(wParam);
+				return 0;
+			}
+		}
+
+		return DefWindowProcW(hwnd, msg, wParam, lParam);
+	}
 }

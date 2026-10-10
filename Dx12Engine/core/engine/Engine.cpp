@@ -8,7 +8,30 @@
 
 namespace DX12 {
 
-    bool Engine::initialize(int width, int height, const std::wstring& title, Scene& scene) {
+    bool Engine::initializeShaders(const std::string &vertexPath, const std::string& pixelPath) {
+        ConsoleLogger::info("Initializing shaders...");
+
+        m_shader = std::make_unique<Shader>();
+
+        ConsoleLogger::debug(std::string("Looking for vertex shader at: ") + vertexPath);
+        if (!m_shader->compileVertexShader(vertexPath)) {
+            ConsoleLogger::error("Failed to compile vertex shader");
+            ConsoleLogger::info("Make sure shaders directory exists and contains VertexShader.hlsl");
+            return false;
+        }
+
+        ConsoleLogger::debug(std::string("Looking for pixel shader at: ") + pixelPath);
+        if (!m_shader->compilePixelShader(pixelPath)) {
+            ConsoleLogger::error("Failed to compile pixel shader");
+            return false;
+        }
+
+        ConsoleLogger::success("Shaders compiled successfully");
+
+        return true;
+    }
+
+    bool Engine::initialize(int width, int height, const std::wstring& title, std::unique_ptr<Scene> scene) {
         ConsoleLogger::info("Initializing engine...");
 
         ConsoleLogger::info("Creating window...");
@@ -27,31 +50,6 @@ namespace DX12 {
         }
         ConsoleLogger::success("Graphics device created successfully");
 
-        ConsoleLogger::info("Compiling shaders...");
-        m_shader = std::make_unique<Shader>();
-
-        char buffer[MAX_PATH];
-        GetCurrentDirectoryA(MAX_PATH, buffer);
-        ConsoleLogger::debug(std::string("Current directory: ") + buffer);
-
-        std::string shaderPath = std::string(buffer) + "\\shaders\\VertexShader.hlsl";
-        ConsoleLogger::debug(std::string("Looking for vertex shader at: ") + shaderPath);
-
-        if (!m_shader->compileVertexShader(shaderPath)) {
-            ConsoleLogger::error("Failed to compile vertex shader");
-            ConsoleLogger::info("Make sure shaders directory exists and contains VertexShader.hlsl");
-            return false;
-        }
-
-        shaderPath = std::string(buffer) + "\\shaders\\PixelShader.hlsl";
-        ConsoleLogger::debug(std::string("Looking for pixel shader at: ") + shaderPath);
-
-        if (!m_shader->compilePixelShader(shaderPath)) {
-            ConsoleLogger::error("Failed to compile pixel shader");
-            return false;
-        }
-        ConsoleLogger::success("Shaders compiled successfully");
-
         ConsoleLogger::info("Creating pipeline...");
         m_pipeline = std::make_unique<Pipeline>();
         if (!m_pipeline->initialize(*m_graphicsDevice, *m_shader)) {
@@ -60,7 +58,10 @@ namespace DX12 {
         }
         ConsoleLogger::success("Pipeline created successfully");
 
-        m_scene = std::make_unique<Scene>(std::move(scene));
+
+        ConsoleLogger::info("Loading scene...");
+        m_scene = std::move(scene);
+        m_scene->load();
 
         ConsoleLogger::info("Creating renderer...");
         m_renderer = std::make_unique<Renderer>();
@@ -73,11 +74,6 @@ namespace DX12 {
         m_renderer->setScene(m_scene.get());
 
         ConsoleLogger::success("Renderer created successfully");
-
-        ConsoleLogger::info("Creating camera...");
-        m_camera = std::make_unique<Camera>();
-        m_camera->setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
-        ConsoleLogger::success("Camera created successfully");
 
         m_lastFrameTime = std::chrono::steady_clock::now();
         m_running = true;
@@ -110,6 +106,7 @@ namespace DX12 {
 
     void Engine::update(float deltaTime) {
         m_camera->update(deltaTime);
+        m_scene->update(deltaTime);
 
         auto& objects = m_scene.get()->getAllObjects();
         for (auto& obj : objects) {

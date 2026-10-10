@@ -72,10 +72,21 @@ int main() {
 
     DX12::Engine engine;
 
-    auto& device = engine.getGraphicsDevice();
-    DX12::Scene scene = Dx12Game::GameScene(device);
+    auto scene = std::make_unique<Dx12Game::GameScene>(engine);
+    ConsoleLogger::info("Compiling shaders...");
 
-    if (!engine.initialize(1024, 768, L"DirectX 12 Triangle Engine", scene)) {
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    ConsoleLogger::debug(std::string("Current directory: ") + buffer);
+
+    const std::string vertexPath = std::string(buffer) + "\\shaders\\VertexShader.hlsl";
+    const std::string pixelPath = std::string(buffer) + "\\shaders\\PixelShader.hlsl";
+    if (!engine.initializeShaders(vertexPath, pixelPath)) {
+        ConsoleLogger::error("Failed to initialize shaders system");
+        return 1;
+    }
+
+    if (!engine.initialize(1024, 768, L"DirectX 12 Triangle Engine", std::move(scene))) {
         ConsoleLogger::error("Failed to initialize engine!");
 
         ConsoleLogger::info("\nTroubleshooting tips:");

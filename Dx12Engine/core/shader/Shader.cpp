@@ -39,17 +39,20 @@ namespace DX12
             &blob, &errorBlob
         );
 
-        ConsoleLogger::success("Shader compiled, size: " + std::to_string(blob->GetBufferSize()));
-
         if (FAILED(hr))
         {
             if (errorBlob)
             {
-                OutputDebugStringA(static_cast<char*>(errorBlob->GetBufferPointer()));
+                ConsoleLogger::error(std::string(static_cast<char*>(
+                    errorBlob->GetBufferPointer()), errorBlob->GetBufferSize()));
+            } else {
+                ConsoleLogger::error("Shader compile failed with no error blob " + std::to_string(static_cast<unsigned>(hr)));
             }
 
             return false;
         }
+
+        ConsoleLogger::success("Shader compiled, size: " + std::to_string(blob->GetBufferSize()));
 
         return true;
 

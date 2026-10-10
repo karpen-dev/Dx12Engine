@@ -18,13 +18,32 @@ namespace DX12 {
         Engine() = default;
         ~Engine() { shutdown(); }
 
-        bool initialize(int width, int height, const std::wstring& title, Scene& scene);
+        bool initialize(int width, int height, const std::wstring& title, std::unique_ptr<Scene> scene);
+        bool initializeShaders(const std::string &vertexPath, const std::string& pixelPath);
+
         void run();
         void shutdown();
+
+        Window& getWindow() noexcept { return *m_window; }
+        const Window& getWindow() const noexcept { return *m_window; }
+
+        Shader& getShader() noexcept { return *m_shader; }
+        const Shader& getShader() const noexcept { return *m_shader; }
+
+        Pipeline& getPipeline() noexcept { return *m_pipeline; }
+        const Pipeline& getPipeline() const noexcept { return *m_pipeline; }
+
+        Scene& getScene() noexcept { return *m_scene; }
+        const Scene& getScene() const noexcept { return *m_scene; }
+
+        Renderer& getRenderer() noexcept { return *m_renderer; }
+        const Renderer& getRenderer() const noexcept { return *m_renderer; }
 
         GraphicsDevice& getGraphicsDevice() {
             return *m_graphicsDevice;
         }
+
+        void setCamera(std::unique_ptr<Camera> camera) noexcept { m_camera = std::move(camera); }
 
     private:
         void update(float deltaTime);

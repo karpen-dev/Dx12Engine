@@ -17,13 +17,24 @@ namespace Dx12Game {
         GameScene(GameScene&&) = default;
         GameScene& operator=(GameScene&&) = default;
 
-        explicit GameScene(DX12::GraphicsDevice& device) : m_device(device) {}
+        explicit GameScene(DX12::Engine& engine) : m_engine(engine) {}
 
         void load() override {
             ConsoleLogger::info("Loading game scene...");
 
+            ConsoleLogger::info("Getting device...");
+            auto& device = m_engine.getGraphicsDevice();
+
+            auto camera = std::make_unique<DX12::Camera>();
+
+            const auto width = static_cast<float>(m_engine.getWindow().getWidth());
+            const auto height = static_cast<float>(m_engine.getWindow().getHeight());
+
+            camera->setAspectRatio(width / height);
+            m_engine.setCamera(std::make_unique<DX12::Camera>());
+
             auto* pyramid = addMeshRenderer("Pyramid");
-            if (!pyramid || !pyramid->createMesh(m_device, DX12::MeshType::Pyramid)) {
+            if (!pyramid || !pyramid->createMesh(device, DX12::MeshType::Pyramid)) {
                 ConsoleLogger::error("Failed to create Pyramid");
                 return;
             }
@@ -40,10 +51,16 @@ namespace Dx12Game {
 
         void update(float deltaTime) override {
             Scene::update(deltaTime);
+
+            if (auto* pyramid = getObject("Pyramid")) {
+                auto& t = pyramid->getTransform();
+                float angle = t.getRotation().y + deltaTime * 1.0f;
+                t.setRotation(0.0f, angle, 0.0f);
+            }
         }
 
     private:
-        DX12::GraphicsDevice& m_device;
+        DX12::Engine& m_engine;
     };
 }
 

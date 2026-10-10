@@ -134,10 +134,9 @@ namespace DX12 {
 
         const float time = static_cast<float>(GetTickCount64()) / 1000.0f;
 
-        DirectX::XMFLOAT4X4 viewMatrix = camera.getViewMatrix();
-        DirectX::XMFLOAT4X4 projectionMatrix = camera.getProjectionMatrix();
+        DirectX::XMMATRIX viewMat = camera.getViewMatrix();
 
-        DirectX::XMMATRIX viewMat = DirectX::XMLoadFloat4x4(&viewMatrix);
+        DirectX::XMFLOAT4X4 projectionMatrix = camera.getProjectionMatrix();
         DirectX::XMMATRIX projMat = DirectX::XMLoadFloat4x4(&projectionMatrix);
 
         for (MeshRenderer* renderer : m_currentScene->getObjectsByType<MeshRenderer>()) {

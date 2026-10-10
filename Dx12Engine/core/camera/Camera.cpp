@@ -106,6 +106,5 @@ namespace DX12 {
         DirectX::XMStoreFloat4x4(&m_viewMatrix, DirectX::XMMatrixLookAtLH(eye, at, up));
     }
 
-    const DirectX::XMFLOAT4X4& Camera::getViewMatrix() const { return m_viewMatrix; }
     const DirectX::XMFLOAT4X4& Camera::getProjectionMatrix() const { return m_projectionMatrix; }
 }

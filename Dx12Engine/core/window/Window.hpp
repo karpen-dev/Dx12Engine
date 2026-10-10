@@ -31,6 +31,10 @@ namespace DX12 {
 		void endFrame() noexcept {
 			m_keysPressed.fill(false);
 			m_keysReleased.fill(false);
+
+			m_mouse.dx = 0.0f;
+			m_mouse.dy = 0.0f;
+			m_mouse.wheel = 0.0f;
 		}
 
 		void onKeyDown(WPARAM vk) noexcept {
@@ -42,13 +46,23 @@ namespace DX12 {
 			m_keys[vk] = false;
 		}
 
+		MouseState getMouse() noexcept { return m_mouse; }
+		const MouseState getMouse() const noexcept { return m_mouse; }
+
+		void captureMouse(bool enabled);
+
 	private:
 		static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+		void recenterCursor();
 
 		HWND m_hwnd;
 		int m_width;
 		int m_height;
 		std::wstring m_title;
+
+		MouseState m_mouse;
+		POINT m_center;
 
 		std::array<bool, 256> m_keys{};
 		std::array<bool, 256> m_keysPressed{};

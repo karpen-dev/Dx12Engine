@@ -30,8 +30,6 @@ namespace Dx12Game {
 
     private:
         DX12::Engine& m_engine;
-
-        float speed = 12.0f;
     };
 }
 

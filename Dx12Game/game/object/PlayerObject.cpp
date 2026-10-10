@@ -14,18 +14,43 @@ namespace Dx12Game {
 
     void PlayerObject::update(float deltaTime) {
         auto& window = m_engine.getWindow();
-        auto& t = getTransform();
-
-        auto p = t.getPosition();
-        if (window.isKeyDown('W')) p.z -= speed * deltaTime;
-        if (window.isKeyDown('S')) p.z += speed * deltaTime;
-        if (window.isKeyDown('A')) p.x += speed * deltaTime;
-        if (window.isKeyDown('D')) p.x -= speed * deltaTime;
-        t.setPosition(p.x, p.y, p.z);
-
         auto& camera = m_engine.getCamera();
-        camera.setPosition(p.x, p.y, p.z + 1.0f);
-        camera.setTarget(p.x, p.y, p.z);
+        const auto& mouse = window.getMouse();
+
+        if (mouse.captured) {
+            const float sens = 0.15f;
+            camera.addYaw( mouse.dx * sens);
+            camera.addPitch(-mouse.dy * sens);
+        }
+        camera.setDistance(camera.clamp(camera.getDistance() - mouse.wheel * 0.5f,
+                                      1.0f, 30.0f));
+
+        auto& t = getTransform();
+        auto p = t.getPosition();
+        const float s = 2.0f * deltaTime;
+
+        float yRad = DirectX::XMConvertToRadians(camera.getYaw());
+
+        DirectX::XMVECTOR forward = DirectX::XMVectorSet(sinf(yRad), 0.0f, -cosf(yRad), 0.0f);
+        DirectX::XMVECTOR right   = DirectX::XMVectorSet(-cosf(yRad), 0.0f, sinf(yRad), 0.0f);
+
+        DirectX::XMVECTOR moveDir = DirectX::XMVectorZero();
+
+        if (window.isKeyDown('W')) moveDir = DirectX::XMVectorAdd(moveDir, forward);
+        if (window.isKeyDown('S')) moveDir = DirectX::XMVectorSubtract(moveDir, forward);
+        if (window.isKeyDown('D')) moveDir = DirectX::XMVectorAdd(moveDir, right);
+        if (window.isKeyDown('A')) moveDir = DirectX::XMVectorSubtract(moveDir, right);
+
+        if (DirectX::XMVector3Greater(DirectX::XMVector3LengthSq(moveDir), DirectX::XMVectorZero())) {
+            moveDir = DirectX::XMVector3Normalize(moveDir);
+
+            DirectX::XMVECTOR currentPos = DirectX::XMLoadFloat3(&p);
+            currentPos = DirectX::XMVectorMultiplyAdd(moveDir, DirectX::XMVectorReplicate(s), currentPos);
+            DirectX::XMStoreFloat3(&p, currentPos);
+        }
+
+        t.setPosition(p.x, p.y, p.z);
+        camera.setTarget(p);
     }
 
 }

@@ -1,7 +1,12 @@
 #include "Window.hpp"
 #include <windowsx.h>
 
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+
 #include "core/ConsoleLogger.hpp"
+
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace DX12 {
 	Window::Window(const int width, const int height, const std::wstring& title)
@@ -80,6 +85,17 @@ namespace DX12 {
 			this
 		);
 
+
+		ConsoleLogger::info("Initializing imgui");
+
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+		ImGui::StyleColorsDark();
+		ImGui_ImplWin32_Init(m_hwnd);
+
 		if (!m_hwnd)
 			return false;
 
@@ -123,6 +139,8 @@ namespace DX12 {
 
 		Window* w = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
 
+		if (::ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam)) return true;
+
 		switch (msg)
 		{
 			case WM_DESTROY:
@@ -148,7 +166,6 @@ namespace DX12 {
 			case WM_MOUSEMOVE: {
 				if (!w) break;
 
-				if (!w) break;
 				if (w->m_mouse.captured) {
 					POINT p{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 					ClientToScreen(hwnd, &p);

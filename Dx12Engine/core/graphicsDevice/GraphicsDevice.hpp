@@ -15,10 +15,12 @@ class GraphicsDevice {
         bool initialize(Window& window);
         void shutdown();
 
-        ComPtr<ID3D12Device> getDevice() const { return m_device; }
+        ID3D12Device* getDevice() const { return m_device.Get(); }
+        ID3D12GraphicsCommandList* getCommandList() const { return m_commandList.Get(); }
+        ID3D12DescriptorHeap* getSRVHeap() const { return m_srvHeap.Get(); }
+
         ComPtr<ID3D12CommandQueue> getCommandQueue() const { return m_commandQueue; }
         ComPtr<ID3D12CommandAllocator> getCommandAllocator() const { return m_commandAllocator; }
-        ComPtr<ID3D12GraphicsCommandList> getCommandList() const { return m_commandList; }
         ComPtr<IDXGISwapChain3> getSwapChain() const { return m_swapChain; }
         ComPtr<ID3D12DescriptorHeap> getRTVHeap() const { return m_rtvHeap; }
         ComPtr<ID3D12DescriptorHeap> getDSVHeap() const { return m_dsvHeap; }
@@ -53,6 +55,8 @@ class GraphicsDevice {
         bool createDepthStencil();
         bool createFenceAndEvent();
 
+        bool createSRVDescriptorHeap();
+
         ComPtr<ID3D12Device> m_device;
         ComPtr<ID3D12CommandQueue> m_commandQueue;
         ComPtr<ID3D12CommandAllocator> m_commandAllocator;
@@ -60,6 +64,9 @@ class GraphicsDevice {
         ComPtr<IDXGISwapChain3> m_swapChain;
         ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
         ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+
+        ComPtr<ID3D12DescriptorHeap> m_srvHeap;
+
         ComPtr<ID3D12Resource> m_renderTargets[2];
         ComPtr<ID3D12Resource> m_depthStencil;
 

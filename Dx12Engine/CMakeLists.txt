@@ -52,6 +52,17 @@ add_library(Dx12EngineCore SHARED
 		core/scene/meshRenderer/MeshRenderer.cpp
 		core/scene/Scene.hpp
 		core/scene/Scene.cpp
+
+		libs/imgui/imgui.cpp
+		libs/imgui/imgui_draw.cpp
+		libs/imgui/imgui_tables.cpp
+		libs/imgui/imgui_widgets.cpp
+		libs/imgui/imgui_demo.cpp
+
+		libs/imgui/backends/imgui_impl_win32.cpp
+		libs/imgui/backends/imgui_impl_dx12.cpp
+		core/guiAPI/GuiAPI.cpp
+		core/guiAPI/GuiAPI.hpp
 )
 
 target_include_directories(Dx12EngineCore PUBLIC
@@ -59,6 +70,9 @@ target_include_directories(Dx12EngineCore PUBLIC
 		${D3D12_INCLUDE_DIR}
 		${DXGI_INCLUDE_DIR}
 		${D3DCOMPILER_INCLUDE_DIR}
+
+		${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui
+		${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui/backends
 )
 
 target_link_libraries(Dx12EngineCore

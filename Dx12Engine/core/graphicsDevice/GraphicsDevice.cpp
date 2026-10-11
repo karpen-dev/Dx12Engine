@@ -57,6 +57,8 @@ namespace DX12
             return false;
         }
 
+        if (!createSRVDescriptorHeap()) return false;
+
         return true;
     }
 
@@ -79,6 +81,8 @@ namespace DX12
         m_commandQueue.Reset();
         m_fence.Reset();
         m_device.Reset();
+
+        if (m_srvHeap) m_srvHeap.Reset();
     }
 
     bool GraphicsDevice::createDevice() {
@@ -450,5 +454,21 @@ namespace DX12
                                    UINT64 byteSize) const
     {
         m_commandList->CopyBufferRegion(dest.Get(), 0, src.Get(), 0, byteSize);
+    }
+
+    bool GraphicsDevice::createSRVDescriptorHeap() {
+        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+        desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        desc.NumDescriptors = 1;
+
+        desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        desc.NodeMask = 0;
+
+        HRESULT hr = m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srvHeap));
+        if (FAILED(hr)) {
+            return false;
+        }
+
+        return true;
     }
 }

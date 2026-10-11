@@ -1,6 +1,7 @@
 #include <core/engine/Engine.hpp>
 #include <core/ConsoleLogger.hpp>
 #include <core/preloader/Preloader.hpp>
+#include <core/guiAPI/GuiAPI.hpp>
 
 #include "game/GameScene.hpp"
 
@@ -8,6 +9,8 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
+
+#include "imgui.h"
 
 LONG WINAPI unhandledExceptionHandler(EXCEPTION_POINTERS* exceptionInfo) {
     ConsoleLogger::error("Unhandled exception occurred!");
@@ -71,6 +74,29 @@ int main() {
     ConsoleLogger::info("\n=== Initializing Engine ===");
 
     DX12::Engine engine;
+
+    engine.setUICallback([&]() {
+        ImGui::SetNextWindowSize(ImVec2(400.0f, 300.0f), ImGuiCond_Always);
+
+        if (DX12::GuiAPI::beginWindow("Engine information")) {
+
+            DX12::GuiAPI::text("FPS: %d", engine.getFPS());
+            DX12::GuiAPI::text("Frame time: %d ms", 1000.0f / engine.getFPS());
+
+            DX12::GuiAPI::separator();
+
+            DX12::GuiAPI::plotLines(
+                "",
+                engine.getFPSHistory(),
+                "",
+                0.0f,
+                120.0f,
+                100.0f
+            );
+
+            DX12::GuiAPI::endWindow();
+        }
+    });
 
     auto scene = std::make_unique<Dx12Game::GameScene>(engine);
     ConsoleLogger::info("Compiling shaders...");

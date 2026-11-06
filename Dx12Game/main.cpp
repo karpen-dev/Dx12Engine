@@ -107,7 +107,10 @@ int main() {
 
             if (const auto* player = scene->getPlayerObject()) {
                 const auto pos = player->getTransform().getPosition();
-                DX12::GuiAPI::text("Player: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
+                const auto rot = player->getTransform().getRotation();
+
+                DX12::GuiAPI::text("Player position: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
+                DX12::GuiAPI::text("Player rotation: (%.2f, %.2f, %.2f)", rot.x, rot.y, rot.z);
             } else {
                 DX12::GuiAPI::text("Player: not loaded");
             }

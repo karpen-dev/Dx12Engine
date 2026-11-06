@@ -23,6 +23,7 @@ namespace DX12 {
         void addPitch(float d) { m_pitch = clamp(m_pitch + d, -80.0f, 80.0f); m_dirty = true; }
 
         float getYaw() const { return m_yaw; }
+        float getPitch() const { return m_pitch; }
 
         void setPosition(const DirectX::XMFLOAT3& position);
         void setPosition(float x, float y, float z);

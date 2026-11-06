@@ -1,7 +1,3 @@
-//
-// Created by chino on 2026/10/11.
-//
-
 #include "GuiAPI.hpp"
 #include "imgui.h"
 
@@ -17,17 +13,17 @@ namespace DX12 {
         ImGui::End();
     }
 
-    void GuiAPI::text(const std::string textFormat, ...) {
+    void GuiAPI::text(const char* fmt, ...) {
         va_list args;
-        va_start(args, textFormat);
-        ImGui::TextV(textFormat.c_str(), args);
+        va_start(args, fmt);
+        ImGui::TextV(fmt, args);
         va_end(args);
     }
 
-    void GuiAPI::textColored(float r, float g, float b, float a, const std::string textFormat, ...) {
+    void GuiAPI::textColored(float r, float g, float b, float a, const char* fmt, ...) {
         va_list args;
-        va_start(args, textFormat);
-        ImGui::TextColoredV(ImVec4(r, g, b, a), textFormat.c_str(), args);
+        va_start(args, fmt);
+        ImGui::TextColoredV(ImVec4(r, g, b, a), fmt, args);
         va_end(args);
     }
 

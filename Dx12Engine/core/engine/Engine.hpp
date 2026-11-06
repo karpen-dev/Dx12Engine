@@ -1,3 +1,7 @@
+//
+// Created by Akari on 2026/10/11.
+//
+
 #pragma once
 
 #include <chrono>

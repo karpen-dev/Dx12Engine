@@ -75,18 +75,27 @@ int main() {
 
     DX12::Engine engine;
 
-    engine.setUICallback([&]() {
+    auto scene = std::make_unique<Dx12Game::GameScene>(engine);
+    ConsoleLogger::info("Compiling shaders...");
+
+    if (!scene) {
+        ConsoleLogger::error("Failed to create scene");
+        return 1;
+    }
+
+    engine.setUICallback([&engine, scene = scene.get()]() {
         ImGui::SetNextWindowSize(ImVec2(400.0f, 300.0f), ImGuiCond_Always);
 
         if (DX12::GuiAPI::beginWindow("Engine information")) {
 
-            DX12::GuiAPI::text("FPS: %d", engine.getFPS());
-            DX12::GuiAPI::text("Frame time: %d ms", 1000.0f / engine.getFPS());
+            const float fps = engine.getFPS();
+            DX12::GuiAPI::text("FPS: %.0f", fps);
+            DX12::GuiAPI::text("Frame time: %.2f ms", fps > 0.0f ? 1000.0f / fps : 0.0f);
 
             DX12::GuiAPI::separator();
 
             DX12::GuiAPI::plotLines(
-                "",
+                " ",
                 engine.getFPSHistory(),
                 "",
                 0.0f,
@@ -94,12 +103,18 @@ int main() {
                 100.0f
             );
 
+            DX12::GuiAPI::separator();
+
+            if (const auto* player = scene->getPlayerObject()) {
+                const auto pos = player->getTransform().getPosition();
+                DX12::GuiAPI::text("Player: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
+            } else {
+                DX12::GuiAPI::text("Player: not loaded");
+            }
+
             DX12::GuiAPI::endWindow();
         }
     });
-
-    auto scene = std::make_unique<Dx12Game::GameScene>(engine);
-    ConsoleLogger::info("Compiling shaders...");
 
     char buffer[MAX_PATH];
     GetCurrentDirectoryA(MAX_PATH, buffer);

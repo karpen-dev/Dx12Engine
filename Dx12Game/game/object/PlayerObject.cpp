@@ -31,8 +31,8 @@ namespace Dx12Game {
 
         float yRad = DirectX::XMConvertToRadians(camera.getYaw());
 
-        DirectX::XMVECTOR forward = DirectX::XMVectorSet(sinf(yRad), 0.0f, -cosf(yRad), 0.0f);
-        DirectX::XMVECTOR right   = DirectX::XMVectorSet(-cosf(yRad), 0.0f, sinf(yRad), 0.0f);
+        DirectX::XMVECTOR forward = DirectX::XMVectorSet(-sinf(yRad), 0.0f, -cosf(yRad), 0.0f);
+        DirectX::XMVECTOR right   = DirectX::XMVectorSet(-cosf(yRad), 0.0f,  sinf(yRad), 0.0f);
 
         DirectX::XMVECTOR moveDir = DirectX::XMVectorZero();
 
@@ -41,7 +41,7 @@ namespace Dx12Game {
         if (window.isKeyDown('D')) moveDir = DirectX::XMVectorAdd(moveDir, right);
         if (window.isKeyDown('A')) moveDir = DirectX::XMVectorSubtract(moveDir, right);
 
-        if (DirectX::XMVector3Greater(DirectX::XMVector3LengthSq(moveDir), DirectX::XMVectorZero())) {
+        if (DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(moveDir)) > 1e-6f) {
             moveDir = DirectX::XMVector3Normalize(moveDir);
 
             DirectX::XMVECTOR currentPos = DirectX::XMLoadFloat3(&p);

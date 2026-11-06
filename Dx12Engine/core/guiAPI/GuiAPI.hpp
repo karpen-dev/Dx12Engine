@@ -1,5 +1,5 @@
 //
-// Created by chino on 2026/10/11.
+// Created by Akari on 2026/10/11.
 //
 
 #pragma once
@@ -23,14 +23,14 @@ namespace DX12 {
         static bool beginWindow(const std::string& title, bool* open = nullptr);
         static void endWindow();
 
-        static void text(std::string textFormat, ...);
+        static void text(const char* fmt, ...);
         static void separator();
         static bool button(const std::string& label, float width = 0.0f, float height = 0.0f);
         static bool checkbox(const std::string& label, bool* value);
         static bool sliderFloat(const std::string& label, float* value, float min, float max);
         static bool inputFloat3(const std::string& label, float value[3]);
 
-        static void textColored(float r, float g, float b, float a, std::string textFormat, ...);
+        static void textColored(float r, float g, float b, float a, const char* fmt, ...);
 
         static void plotLines(const std::string& label,
                               const std::vector<float>& values,

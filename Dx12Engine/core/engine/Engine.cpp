@@ -8,6 +8,7 @@
 #include "../ConsoleLogger.hpp"
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
 namespace DX12 {
 
@@ -85,9 +86,6 @@ namespace DX12 {
         init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle) {
             *out_cpu_handle = info->SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
             *out_gpu_handle = info->SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-        };init_info.SrvDescriptorAllocFn = [](ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE* out_cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE* out_gpu_handle) {
-            *out_cpu_handle = info->SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-            *out_gpu_handle = info->SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
         };
 
         init_info.SrvDescriptorFreeFn = [](ImGui_ImplDX12_InitInfo* info, D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle, D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle) {
@@ -147,8 +145,11 @@ namespace DX12 {
     }
 
     void Engine::update(float deltaTime) {
-        m_camera->update(deltaTime);
+        if (deltaTime < 0.0001f) deltaTime = 0.0001f;
+
         m_scene->update(deltaTime);
+        m_camera->update(deltaTime);
+
         m_window->endFrame();
 
         updateUI();
@@ -156,25 +157,16 @@ namespace DX12 {
         m_fpsTimer += deltaTime;
         m_frameCount++;
 
-        if (m_fpsTimer >= 1.0f) {
+        if (m_fpsTimer >= 0.5f) {
             m_currentFPS = static_cast<float>(m_frameCount) / m_fpsTimer;
             m_frameCount = 0;
             m_fpsTimer = 0.0f;
         }
 
-        if (deltaTime <= 0.0f) deltaTime = 0.001f;
-        float currentInstantFPS = 1.0f / deltaTime;
+        const float currentInstantFPS = 1.0f / deltaTime;
 
-        for (size_t i = 0; i < m_fpsHistory.size() - 1; ++i) {
-            m_fpsHistory[i] = m_fpsHistory[i + 1];
-        }
-
+        std::rotate(m_fpsHistory.begin(), m_fpsHistory.begin() + 1, m_fpsHistory.end());
         m_fpsHistory.back() = currentInstantFPS;
-
-        auto& objects = m_scene->getAllObjects();
-        for (auto& obj : objects) {
-            obj->update(deltaTime);
-        }
     }
 
     void Engine::render() {

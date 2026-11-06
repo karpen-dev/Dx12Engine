@@ -25,16 +25,17 @@ namespace Dx12Game {
             ConsoleLogger::info("Getting device...");
             auto& device = m_engine.getGraphicsDevice();
 
-            auto* player = addObject<PlayerObject>("Player", m_engine);
-            auto* playerMesh = addMeshRenderer("PlayerVisual");
-            if (playerMesh && playerMesh->createMesh(device, DX12::MeshType::Cube)) {
-                playerMesh->getTransform().setParent(&player->getTransform());
-                playerMesh->getTransform().setPosition(0.0f, 0.0f, 0.0f);
-            }
+            m_player_object = addObject<PlayerObject>("Player", m_engine);
 
-            if (!player) {
+            if (!m_player_object) {
                 ConsoleLogger::error("Failed to create PlayerObject");
                 return;
+            }
+
+            auto* playerMesh = addMeshRenderer("PlayerVisual");
+            if (playerMesh && playerMesh->createMesh(device, DX12::MeshType::Cube)) {
+                playerMesh->getTransform().setParent(&m_player_object->getTransform());
+                playerMesh->getTransform().setPosition(0.0f, 0.0f, 0.0f);
             }
 
             auto* pyramid = addMeshRenderer("Pyramid");
@@ -63,8 +64,12 @@ namespace Dx12Game {
             }
         }
 
+        PlayerObject* getPlayerObject() noexcept { return m_player_object; }
+        const PlayerObject* getPlayerObject() const noexcept { return m_player_object; }
+
     private:
         DX12::Engine& m_engine;
+        PlayerObject* m_player_object = nullptr;
     };
 }
 

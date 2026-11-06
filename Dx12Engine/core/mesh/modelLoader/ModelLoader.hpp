@@ -1,3 +1,7 @@
+//
+// Created by Akari on 2026/11/07.
+//
+
 #pragma once
 
 #include "../../Types.hpp"

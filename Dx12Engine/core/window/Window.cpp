@@ -150,10 +150,12 @@ namespace DX12 {
 			case WM_KEYDOWN:
 			{
 				if (wParam == VK_ESCAPE) {
-					PostQuitMessage(0);
+					w->captureMouse(false);
 					return 0;
 				}
+
 				if (w) w->onKeyDown(wParam);
+
 				return 0;
 			}
 
@@ -181,10 +183,16 @@ namespace DX12 {
 			}
 
 			case WM_LBUTTONDOWN: {
-				if (w && !w->getMouse().captured) {
-					w->captureMouse(true);
-					ConsoleLogger::info("try to capture");
+				DWORD now = GetMessageTime();
+				if (!w->m_mouse_once_clicked ||
+					now - w->m_last_click_time > GetDoubleClickTime())
+				{
+					w->m_mouse_once_clicked = true;
+					w->m_last_click_time = now;
+					return 0;
 				}
+				w->m_mouse_once_clicked = false;
+				w->captureMouse(true);
 
 				return 0;
 			}

@@ -67,5 +67,8 @@ namespace DX12 {
 		std::array<bool, 256> m_keys{};
 		std::array<bool, 256> m_keysPressed{};
 		std::array<bool, 256> m_keysReleased{};
+
+		bool m_mouse_once_clicked = false;
+		UINT m_last_click_time = 0;
 	};
 }
